@@ -18,6 +18,7 @@ package com.android.server.telecom;
 
 import android.content.Context;
 import android.os.PowerManager;
+import android.os.SystemProperties;
 
 import cyanogenmod.hardware.CMHardwareManager;
 
@@ -30,6 +31,9 @@ public class ProximitySensorManager extends CallsManagerListenerBase {
     private final PowerManager.WakeLock mProximityWakeLock;
     private boolean mWasTapToWakeEnabled = false;
     private final CMHardwareManager mHardware;
+
+    // MTK/Meizu workaround
+    private static final boolean mIsMTKHardware = !(SystemProperties.get("ro.mediatek.platform", "").equals(""));
 
     public ProximitySensorManager(Context context) {
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -47,7 +51,11 @@ public class ProximitySensorManager extends CallsManagerListenerBase {
     public void onCallRemoved(Call call) {
         if (CallsManager.getInstance().getCalls().isEmpty()) {
             Log.i(this, "All calls removed, resetting proximity sensor to default state");
-            turnOff(true);
+
+            // MTK has screenOnImmediately set to false, at least on Meizu MX4
+            // passing true would result in tap-to-wake or proximity sensor
+            // stopping working if remote hung up.
+            turnOff(!mIsMTKHardware);
         }
         super.onCallRemoved(call);
     }
