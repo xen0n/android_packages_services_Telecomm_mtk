@@ -55,6 +55,14 @@ public class ProximitySensorManager extends CallsManagerListenerBase {
             // passing true would result in tap-to-wake or proximity sensor
             // stopping working if remote hung up.
             turnOff(!mIsMTKHardware);
+
+            // Seems only calling turnOff with false can't eliminate all cases
+            // of malfunctioning... will have to re-calibrate then.
+            if (mIsMTKHardware) {
+                // call into calibration service if one exists
+                // hopefully none will run into namespace collision with me...
+                SystemProperties.set("ctl.start", "ps_calibrate");
+            }
         }
         super.onCallRemoved(call);
     }
