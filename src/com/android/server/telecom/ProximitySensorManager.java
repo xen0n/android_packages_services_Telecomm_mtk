@@ -51,14 +51,14 @@ public class ProximitySensorManager extends CallsManagerListenerBase {
     public void onCallRemoved(Call call) {
         if (CallsManager.getInstance().getCalls().isEmpty()) {
             Log.i(this, "All calls removed, resetting proximity sensor to default state");
+            turnOff(true);
 
             // MTK has screenOnImmediately set to false, at least on Meizu MX4
             // passing true would result in tap-to-wake or proximity sensor
             // stopping working if remote hung up.
-            turnOff(!mIsMTKHardware);
-
-            // Seems only calling turnOff with false can't eliminate all cases
-            // of malfunctioning... will have to re-calibrate then.
+            // However it seems only calling turnOff with false can't eliminate
+            // all cases of malfunctioning... so we'd rather keep the original
+            // sources and re-calibrate instead.
             if (mIsMTKHardware) {
                 // call into calibration service if one exists
                 // hopefully none will run into namespace collision with me...
